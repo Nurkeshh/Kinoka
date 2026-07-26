@@ -1,0 +1,30 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Избранное{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="section-title">Избранное</h2>
+    <div class="catalog">
+        {% for product in products %}
+        <div class="card">
+            <a href="{% url 'toggle_favorite' product.id %}" class="card__fav card__fav--active">♥</a>
+            <a href="{% url 'product_detail' product.slug %}" class="card__link">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card__img">
+                {% else %}
+                    <div class="card__img card__img--placeholder"></div>
+                {% endif %}
+                <div class="card__body">
+                    <p class="card__name">{{ product.name }}</p>
+                    <p class="card__price">{{ product.price }} ₸</p>
+                </div>
+            </a>
+            <a href="{% url 'add_to_cart' product.id %}" class="card__cart">🛒</a>
+        </div>
+        {% empty %}
+            <p>Пока ничего не добавлено в избранное.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

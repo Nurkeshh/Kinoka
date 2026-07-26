@@ -1,0 +1,41 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="product-detail">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-detail__img">
+        {% else %}
+            <div class="product-detail__img card__img--placeholder"></div>
+        {% endif %}
+
+        <div class="product-detail__info">
+            <h1 class="product-detail__name">{{ product.name }}</h1>
+
+            <div class="card__rating">
+                {% for i in "12345" %}
+                    {% if forloop.counter <= product.rating %}★{% else %}☆{% endif %}
+                {% endfor %}
+                <span class="card__reviews">({{ product.reviews_count }} отзывов)</span>
+            </div>
+
+            <p class="product-detail__price">{{ product.price }} ₸</p>
+            <div class="card__installment">
+                {{ product.installment_price }} ₸ <span>x{{ product.installment_months }}</span>
+            </div>
+
+            <p class="product-detail__description">{{ product.description|default:"Описание скоро появится." }}</p>
+
+            <div class="product-detail__actions">
+                <a href="{% url 'add_to_cart' product.id %}" class="product-detail__buy">В корзину</a>
+                <a href="{% url 'toggle_favorite' product.id %}" class="product-detail__fav">
+                    {% if product.id in favorites %}♥ В избранном{% else %}♡ В избранное{% endif %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

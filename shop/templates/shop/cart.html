@@ -1,0 +1,34 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Корзина{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="section-title">Корзина</h2>
+
+    {% if items %}
+        <div class="cart-list">
+            {% for item in items %}
+            <div class="cart-item">
+                {% if item.product.image %}
+                    <img src="{{ item.product.image.url }}" class="cart-item__img">
+                {% else %}
+                    <div class="cart-item__img card__img--placeholder"></div>
+                {% endif %}
+                <div class="cart-item__info">
+                    <p class="card__name">{{ item.product.name }}</p>
+                    <p>{{ item.quantity }} шт. × {{ item.product.price }} ₸</p>
+                </div>
+                <p class="cart-item__subtotal">{{ item.subtotal }} ₸</p>
+                <a href="{% url 'remove_from_cart' item.product.id %}" class="cart-item__remove">✕</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="cart-total">Итого: {{ total }} ₸</div>
+        <button class="product-detail__buy">Оформить заказ</button>
+    {% else %}
+        <p>Корзина пуста.</p>
+    {% endif %}
+</div>
+{% endblock %}

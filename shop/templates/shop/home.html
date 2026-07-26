@@ -1,0 +1,50 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="filters">
+        <a href="{% url 'home' %}" class="filter-btn {% if not current_category %}filter-btn--active{% endif %}">Все</a>
+        {% for category in categories %}
+        <a href="{% url 'home' %}?category={{ category.slug }}"
+           class="filter-btn {% if current_category == category.slug %}filter-btn--active{% endif %}">
+            {{ category.name }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <h2 class="section-title">Популярное</h2>
+    <div class="catalog">
+        {% for product in products %}
+        <div class="card">
+            <a href="{% url 'toggle_favorite' product.id %}" class="card__fav {% if product.id in favorites %}card__fav--active{% endif %}">
+                {% if product.id in favorites %}♥{% else %}♡{% endif %}
+            </a>
+            <a href="{% url 'product_detail' product.slug %}" class="card__link">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card__img">
+                {% else %}
+                    <div class="card__img card__img--placeholder"></div>
+                {% endif %}
+                <div class="card__body">
+                    <p class="card__name">{{ product.name }}</p>
+                    <div class="card__rating">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= product.rating %}★{% else %}☆{% endif %}
+                        {% endfor %}
+                        <span class="card__reviews">({{ product.reviews_count }})</span>
+                    </div>
+                    <p class="card__price">{{ product.price }} ₸</p>
+                    <div class="card__installment">
+                        {{ product.installment_price }} ₸ <span>x{{ product.installment_months }}</span>
+                    </div>
+                </div>
+            </a>
+            <a href="{% url 'add_to_cart' product.id %}" class="card__cart">🛒</a>
+        </div>
+        {% empty %}
+            <p>Товаров пока нет.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
