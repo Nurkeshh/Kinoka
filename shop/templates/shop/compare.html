@@ -1,0 +1,54 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Сравнение товаров{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="section-title">Сравнение товаров</h2>
+
+    {% if products %}
+    <div class="compare-table-wrap">
+        <table class="compare-table">
+            <tr>
+                <td class="compare-table__label"></td>
+                {% for product in products %}
+                <td class="compare-table__product">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="compare-table__img">
+                    {% endif %}
+                    <p>{{ product.name }}</p>
+                    <a href="{% url 'toggle_compare' product.id %}" class="compare-table__remove">Убрать</a>
+                </td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td class="compare-table__label">Цена</td>
+                {% for product in products %}
+                    <td>{{ product.price }} ₸</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td class="compare-table__label">Рейтинг</td>
+                {% for product in products %}
+                    <td>{{ product.average_rating }} ★</td>
+                {% endfor %}
+            </tr>
+            {% for spec_name in spec_names %}
+            <tr>
+                <td class="compare-table__label">{{ spec_name }}</td>
+                {% for product in products %}
+                    <td>
+                        {% for spec in product.specifications.all %}
+                            {% if spec.name == spec_name %}{{ spec.value }}{% endif %}
+                        {% endfor %}
+                    </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% else %}
+        <p>Список сравнения пуст. Добавьте товары через значок ⚖️ на карточке.</p>
+    {% endif %}
+</div>
+{% endblock %}

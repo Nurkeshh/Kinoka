@@ -1,0 +1,43 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Мои заказы{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="section-title">Мои заказы</h2>
+    {% for order in orders %}
+    <div class="order-card">
+        <div class="order-card__header">
+            <span>Заказ №{{ order.id }}</span>
+            <span>{{ order.created_at|date:"d.m.Y H:i" }}</span>
+        </div>
+
+        {% if order.status != "cancelled" %}
+        <div class="status-progress">
+            <div class="status-progress__bar">
+                <div class="status-progress__fill" style="width: {{ order.status_progress|add:'-1' }}0%; --steps: 3;"></div>
+            </div>
+            <div class="status-progress__labels">
+                <span class="{% if order.status_progress >= 1 %}status-progress__label--active{% endif %}">Оформлен</span>
+                <span class="{% if order.status_progress >= 2 %}status-progress__label--active{% endif %}">Собирается</span>
+                <span class="{% if order.status_progress >= 3 %}status-progress__label--active{% endif %}">В пути</span>
+                <span class="{% if order.status_progress >= 4 %}status-progress__label--active{% endif %}">Доставлен</span>
+            </div>
+        </div>
+        {% else %}
+            <p class="order-card__cancelled">Заказ отменён</p>
+        {% endif %}
+
+        {% for item in order.items.all %}
+            <div class="order-card__row">
+                <span>{{ item.product.name }} × {{ item.quantity }}</span>
+                <span>{{ item.subtotal }} ₸</span>
+            </div>
+        {% endfor %}
+        <div class="order-card__total">Итого: {{ order.total_price }} ₸</div>
+    </div>
+    {% empty %}
+        <p>У вас пока нет заказов.</p>
+    {% endfor %}
+</div>
+{% endblock %}

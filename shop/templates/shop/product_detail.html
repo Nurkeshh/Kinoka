@@ -6,36 +6,154 @@
 {% block content %}
 <div class="container">
     <div class="product-detail">
-        {% if product.image %}
-            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-detail__img">
-        {% else %}
-            <div class="product-detail__img card__img--placeholder"></div>
-        {% endif %}
+        <div class="product-detail__gallery">
+            {% if product.discount_percent %}
+                <div class="card__badge">-{{ product.discount_percent }}%</div>
+            {% endif %}
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-detail__img skeleton" id="mainImage" onload="this.classList.add('loaded')">
+            {% else %}
+                <div class="product-detail__img card__img--placeholder" id="mainImage"></div>
+            {% endif %}
+
+            {% if product.images.all %}
+            <div class="product-detail__thumbs">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" class="product-detail__thumb" onclick="document.getElementById('mainImage').src=this.src">
+                {% endif %}
+                {% for img in product.images.all %}
+                    <img src="{{ img.image.url }}" class="product-detail__thumb" onclick="document.getElementById('mainImage').src=this.src">
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if product.specifications.all %}
+            <table class="specs-table">
+                {% for spec in product.specifications.all %}
+                <tr>
+                    <td class="specs-table__name">{{ spec.name }}</td>
+                    <td class="specs-table__value">{{ spec.value }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% endif %}
+        </div>
 
         <div class="product-detail__info">
             <h1 class="product-detail__name">{{ product.name }}</h1>
 
             <div class="card__rating">
                 {% for i in "12345" %}
-                    {% if forloop.counter <= product.rating %}★{% else %}☆{% endif %}
+                    {% if forloop.counter <= product.average_rating %}★{% else %}☆{% endif %}
                 {% endfor %}
-                <span class="card__reviews">({{ product.reviews_count }} отзывов)</span>
+                <span class="card__reviews">({{ product.total_reviews }} отзывов)</span>
             </div>
 
-            <p class="product-detail__price">{{ product.price }} ₸</p>
+            <div class="card__price-row">
+                <p class="product-detail__price">{{ product.price }} ₸</p>
+                {% if product.old_price %}
+                    <span class="card__old-price">{{ product.old_price }} ₸</span>
+                {% endif %}
+            </div>
             <div class="card__installment">
                 {{ product.installment_price }} ₸ <span>x{{ product.installment_months }}</span>
             </div>
 
-            <p class="product-detail__description">{{ product.description|default:"Описание скоро появится." }}</p>
+            {% if product.variants %}
+            <div class="variants">
+                <p class="variants__label">Варианты:</p>
+                <div class="variants__list">
+                    <span class="variant-btn variant-btn--active">{{ product.variant_label|default:"Этот" }}</span>
+                    {% for variant in product.variants %}
+                        <a href="{% url 'product_detail' variant.slug %}" class="variant-btn">{{ variant.variant_label }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if product.in_stock %}
+                <p class="product-detail__stock">В наличии: {{ product.stock }} шт.</p>
+            {% else %}
+                <p class="product-detail__stock product-detail__stock--out">Нет в наличии</p>
+            {% endif %}
+
+            <div class="product-detail__description">{{ product.description|default:"Описание скоро появится."|linebreaks }}</div>
 
             <div class="product-detail__actions">
-                <a href="{% url 'add_to_cart' product.id %}" class="product-detail__buy">В корзину</a>
+                {% if product.in_stock %}
+                    <a href="{% url 'add_to_cart' product.id %}" class="product-detail__buy">В корзину</a>
+                {% else %}
+                    <a href="{% url 'product_request' product.id %}" class="product-detail__buy">Оставить заявку</a>
+                {% endif %}
+
+                {% if product.kaspi_url %}
+                    <a href="{{ product.kaspi_url }}" target="_blank" rel="noopener" class="product-detail__buy product-detail__buy--kaspi">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Купить через Kaspi
+                    </a>
+                {% endif %}
+
                 <a href="{% url 'toggle_favorite' product.id %}" class="product-detail__fav">
-                    {% if product.id in favorites %}♥ В избранном{% else %}♡ В избранное{% endif %}
+                    {% if product.id in favorites %}<i class="fa-solid fa-heart"></i> В избранном{% else %}<i class="fa-regular fa-heart"></i> В избранное{% endif %}
                 </a>
             </div>
         </div>
+    </div>
+
+    {% if related_products %}
+    <h2 class="section-title">Похожие товары</h2>
+    <div class="catalog">
+        {% for item in related_products %}
+        <div class="card">
+            <a href="{% url 'product_detail' item.slug %}" class="card__link">
+                {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.name }}" class="card__img skeleton" onload="this.classList.add('loaded')">
+                {% else %}
+                    <div class="card__img card__img--placeholder"></div>
+                {% endif %}
+                <div class="card__body">
+                    <p class="card__name">{{ item.name }}</p>
+                    <p class="card__price">{{ item.price }} ₸</p>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <h2 class="section-title">Отзывы</h2>
+    <div class="reviews">
+        {% for review in product.reviews.all %}
+        <div class="review">
+            <div class="review__header">
+                <span class="review__name">{{ review.name }}</span>
+                <span class="card__rating">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                    {% endfor %}
+                </span>
+            </div>
+            <p class="review__text">{{ review.text }}</p>
+        </div>
+        {% empty %}
+            <p>Отзывов пока нет — будьте первым!</p>
+        {% endfor %}
+    </div>
+
+    <div class="review-form-wrap">
+        <h3>Оставить отзыв</h3>
+        <form method="post" class="review-form">
+            {% csrf_token %}
+            <input type="text" name="name" placeholder="Ваше имя" required>
+            <select name="rating">
+                <option value="5">★★★★★</option>
+                <option value="4">★★★★☆</option>
+                <option value="3">★★★☆☆</option>
+                <option value="2">★★☆☆☆</option>
+                <option value="1">★☆☆☆☆</option>
+            </select>
+            <textarea name="text" placeholder="Ваш отзыв" required></textarea>
+            <button type="submit" class="product-detail__buy">Отправить отзыв</button>
+        </form>
     </div>
 </div>
 {% endblock %}

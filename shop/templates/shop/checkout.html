@@ -1,0 +1,42 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Оформление заказа{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="section-title">Оформление заказа</h2>
+
+    <div class="checkout-layout">
+        <form method="post" class="checkout-form">
+            {% csrf_token %}
+            <label>Имя</label>
+            <input type="text" name="name" required>
+
+            <label>Телефон</label>
+            <input type="tel" name="phone" required placeholder="+7 700 000 00 00">
+
+            <label>Адрес доставки</label>
+            <input type="text" name="address">
+
+            <button type="submit" class="product-detail__buy">Подтвердить заказ</button>
+        </form>
+
+        <div class="checkout-summary">
+            <h3>Ваш заказ</h3>
+            {% for item in items %}
+                <div class="checkout-summary__row">
+                    <span>{{ item.product.name }} × {{ item.quantity }}</span>
+                    <span>{{ item.subtotal }} ₸</span>
+                </div>
+            {% endfor %}
+            {% if promo %}
+                <div class="checkout-summary__row">
+                    <span>Промокод {{ promo.code }}</span>
+                    <span>-{{ promo.discount_percent }}%</span>
+                </div>
+            {% endif %}
+            <div class="checkout-summary__total">Итого: {{ discounted_total }} ₸</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

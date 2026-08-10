@@ -1,0 +1,23 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Связаться с нами{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="auth-form-wrap">
+        <h2 class="section-title">Связаться с нами</h2>
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            <label>Имя</label>
+            <input type="text" name="name" required>
+            <label>Email или телефон</label>
+            <input type="text" name="contact" required>
+            <label>Тема</label>
+            <input type="text" name="subject">
+            <label>Сообщение</label>
+            <textarea name="message" rows="5" required></textarea>
+            <button type="submit" class="product-detail__buy">Отправить</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

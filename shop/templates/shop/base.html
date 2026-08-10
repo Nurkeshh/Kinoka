@@ -3,30 +3,107 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Kinoka{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Kinoka — интернет-магазин техники и товаров для дома в Казахстане{% endblock %}">
+    <title>{% block title %}Kinoka — интернет-магазин{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'shop/img/favicon.svg' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{% static 'shop/css/style.css' %}">
 </head>
 <body>
     <header class="header">
         <div class="header__inner">
             <a href="{% url 'home' %}" class="logo">Kinoka</a>
-            <button class="catalog-btn">☰ Каталог</button>
+
             <form action="{% url 'home' %}" method="get" class="search-form">
                 <input type="text" name="q" class="search" placeholder="Искать товары..." value="{{ request.GET.q }}">
             </form>
-            <div class="header__icons">
-                <a href="{% url 'favorites_list' %}" class="icon">♡</a>
-                <a href="{% url 'cart_detail' %}" class="icon">🛒</a>
+
+            <div class="header__right">
+                <div class="catalog-wrapper">
+                    <button class="catalog-btn" onclick="document.getElementById('catalogDropdown').classList.toggle('show'); document.getElementById('cityDropdown').classList.remove('show');">
+                        <i class="fa-solid fa-bars"></i> Каталог
+                    </button>
+                    <div class="catalog-dropdown" id="catalogDropdown">
+                        {% for category in all_categories %}
+                            <a href="{% url 'home' %}?category={{ category.slug }}">{{ category.name }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="city-wrapper">
+                    <button class="catalog-btn" onclick="document.getElementById('cityDropdown').classList.toggle('show'); document.getElementById('catalogDropdown').classList.remove('show');">
+                        <i class="fa-solid fa-location-dot"></i> {{ selected_city }}
+                    </button>
+                    <div class="city-dropdown" id="cityDropdown">
+                        <p class="city-dropdown__title">Выберите город доставки</p>
+                        <svg viewBox="0 0 600 300" class="kz-map">
+                            <polygon class="kz-map__shape" points="30,150 60,90 120,60 200,40 280,30 380,40 460,50 520,70 560,100 580,140 560,180 500,220 420,250 340,270 260,260 180,250 100,230 50,200" />
+                            {% for slug, city in cities.items %}
+                            <a href="{% url 'set_city' slug %}" class="kz-city {% if slug == selected_city_slug %}kz-city--active{% endif %}">
+                                <circle cx="{{ city.x }}" cy="{{ city.y }}" r="7"></circle>
+                                <text x="{{ city.x }}" y="{{ city.y|add:'-12' }}" text-anchor="middle">{{ city.name }}</text>
+                            </a>
+                            {% endfor %}
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="header__icons">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'my_orders' %}" class="icon" title="Мои заказы"><i class="fa-regular fa-user"></i></a>
+                        <a href="{% url 'logout' %}" class="icon" title="Выйти"><i class="fa-solid fa-right-from-bracket"></i></a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="icon" title="Войти"><i class="fa-regular fa-user"></i></a>
+                    {% endif %}
+                    <a href="{% url 'compare_view' %}" class="icon icon--counter" title="Сравнение">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                        {% if compare_count %}<span class="icon__badge">{{ compare_count }}</span>{% endif %}
+                    </a>
+                    <a href="{% url 'favorites_list' %}" class="icon icon--counter" title="Избранное">
+                        <i class="fa-regular fa-heart"></i>
+                        {% if favorites_count %}<span class="icon__badge">{{ favorites_count }}</span>{% endif %}
+                    </a>
+                    <a href="{% url 'cart_detail' %}" class="icon icon--counter" title="Корзина">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        {% if cart_count %}<span class="icon__badge">{{ cart_count }}</span>{% endif %}
+                    </a>
+                </div>
             </div>
         </div>
     </header>
+
+    {% if messages %}
+    <div class="toast-container" id="toastContainer">
+        {% for message in messages %}
+            <div class="toast toast--{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
     <main>
         {% block content %}{% endblock %}
     </main>
 
     <footer class="footer">
-        <p>© 2026 Kinoka. Все права защищены.</p>
+        <div class="footer__inner">
+            <p>© 2026 Kinoka. Все права защищены.</p>
+            <a href="{% url 'feedback' %}" class="footer__link">Связаться с нами</a>
+            <form action="{% url 'subscribe' %}" method="post" class="subscribe-form">
+                {% csrf_token %}
+                <input type="email" name="email" placeholder="Ваш email для рассылки" required>
+                <button type="submit"><i class="fa-solid fa-paper-plane"></i></button>
+            </form>
+        </div>
     </footer>
+
+    <script>
+        setTimeout(function () {
+            document.querySelectorAll('.toast').forEach(function (t) {
+                t.classList.add('toast--hide');
+            });
+        }, 3000);
+    </script>
 </body>
 </html>

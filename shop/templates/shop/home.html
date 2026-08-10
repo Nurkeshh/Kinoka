@@ -3,48 +3,132 @@
 
 {% block content %}
 <div class="container">
-    <div class="filters">
-        <a href="{% url 'home' %}" class="filter-btn {% if not current_category %}filter-btn--active{% endif %}">Все</a>
-        {% for category in categories %}
-        <a href="{% url 'home' %}?category={{ category.slug }}"
-           class="filter-btn {% if current_category == category.slug %}filter-btn--active{% endif %}">
-            {{ category.name }}
-        </a>
-        {% endfor %}
-    </div>
-
-    <h2 class="section-title">Популярное</h2>
-    <div class="catalog">
-        {% for product in products %}
-        <div class="card">
-            <a href="{% url 'toggle_favorite' product.id %}" class="card__fav {% if product.id in favorites %}card__fav--active{% endif %}">
-                {% if product.id in favorites %}♥{% else %}♡{% endif %}
-            </a>
-            <a href="{% url 'product_detail' product.slug %}" class="card__link">
-                {% if product.image %}
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card__img">
-                {% else %}
-                    <div class="card__img card__img--placeholder"></div>
-                {% endif %}
-                <div class="card__body">
-                    <p class="card__name">{{ product.name }}</p>
-                    <div class="card__rating">
-                        {% for i in "12345" %}
-                            {% if forloop.counter <= product.rating %}★{% else %}☆{% endif %}
-                        {% endfor %}
-                        <span class="card__reviews">({{ product.reviews_count }})</span>
+    <div class="shop-layout">
+        <div class="shop-main">
+            <h2 class="section-title">Популярное</h2>
+            <div class="catalog">
+                {% for product in products %}
+                <div class="card {% if not product.in_stock %}card--out{% endif %}">
+                    {% if product.discount_percent %}
+                        <div class="card__badge">-{{ product.discount_percent }}%</div>
+                    {% elif not product.in_stock %}
+                        <div class="card__badge card__badge--gray">Нет в наличии</div>
+                    {% elif product.is_bestseller %}
+                        <div class="card__badge card__badge--gold">Хит продаж</div>
+                    {% endif %}
+                    <div class="card__top-actions">
+                        <a href="{% url 'toggle_favorite' product.id %}" class="card__fav {% if product.id in favorites %}card__fav--active{% endif %}">
+                            {% if product.id in favorites %}<i class="fa-solid fa-heart"></i>{% else %}<i class="fa-regular fa-heart"></i>{% endif %}
+                        </a>
+                        <a href="{% url 'toggle_compare' product.id %}" class="card__fav {% if product.id in compare_list %}card__fav--active{% endif %}" title="Сравнить">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </a>
                     </div>
-                    <p class="card__price">{{ product.price }} ₸</p>
-                    <div class="card__installment">
-                        {{ product.installment_price }} ₸ <span>x{{ product.installment_months }}</span>
-                    </div>
+                    <a href="{% url 'product_detail' product.slug %}" class="card__link">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card__img skeleton" onload="this.classList.add('loaded')">
+                        {% else %}
+                            <div class="card__img card__img--placeholder"></div>
+                        {% endif %}
+                        <div class="card__body">
+                            <p class="card__name">{{ product.name }}</p>
+                            <div class="card__rating">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= product.average_rating %}★{% else %}☆{% endif %}
+                                {% endfor %}
+                                <span class="card__reviews">({{ product.total_reviews }})</span>
+                            </div>
+                            <div class="card__price-row">
+                                <p class="card__price">{{ product.price }} ₸</p>
+                                {% if product.old_price %}
+                                    <span class="card__old-price">{{ product.old_price }} ₸</span>
+                                {% endif %}
+                            </div>
+                            <div class="card__installment">
+                                {{ product.installment_price }} ₸ <span>x{{ product.installment_months }}</span>
+                            </div>
+                        </div>
+                    </a>
+                    {% if product.in_stock %}
+                        <a href="{% url 'add_to_cart' product.id %}" class="card__cart"><i class="fa-solid fa-cart-shopping"></i></a>
+                    {% else %}
+                        <a href="{% url 'product_request' product.id %}" class="card__cart card__cart--request" title="Оставить заявку"><i class="fa-regular fa-bell"></i></a>
+                    {% endif %}
                 </div>
-            </a>
-            <a href="{% url 'add_to_cart' product.id %}" class="card__cart">🛒</a>
+                {% empty %}
+                    <p>Товаров пока нет.</p>
+                {% endfor %}
+            </div>
+
+            {% if products.has_other_pages %}
+            <div class="pagination">
+                {% if products.has_previous %}
+                    <a href="?page={{ products.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if query %}&q={{ query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if price_min %}&price_min={{ price_min }}{% endif %}{% if price_max %}&price_max={{ price_max }}{% endif %}{% if min_rating %}&min_rating={{ min_rating }}{% endif %}" class="page-btn">←</a>
+                {% endif %}
+                {% for num in products.paginator.page_range %}
+                    <a href="?page={{ num }}{% if current_category %}&category={{ current_category }}{% endif %}{% if query %}&q={{ query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if price_min %}&price_min={{ price_min }}{% endif %}{% if price_max %}&price_max={{ price_max }}{% endif %}{% if min_rating %}&min_rating={{ min_rating }}{% endif %}"
+                       class="page-btn {% if products.number == num %}page-btn--active{% endif %}">{{ num }}</a>
+                {% endfor %}
+                {% if products.has_next %}
+                    <a href="?page={{ products.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if query %}&q={{ query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if price_min %}&price_min={{ price_min }}{% endif %}{% if price_max %}&price_max={{ price_max }}{% endif %}{% if min_rating %}&min_rating={{ min_rating }}{% endif %}" class="page-btn">→</a>
+                {% endif %}
+            </div>
+            {% endif %}
         </div>
-        {% empty %}
-            <p>Товаров пока нет.</p>
-        {% endfor %}
+
+        <aside class="shop-sidebar">
+            <div class="sidebar-block">
+                <h3 class="sidebar-block__title">Категории</h3>
+                <div class="filters filters--vertical">
+                    <a href="{% url 'home' %}" class="filter-btn {% if not current_category %}filter-btn--active{% endif %}">Все</a>
+                    {% for category in categories %}
+                    <a href="{% url 'home' %}?category={{ category.slug }}"
+                       class="filter-btn {% if current_category == category.slug %}filter-btn--active{% endif %}">
+                        {{ category.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="sidebar-block">
+                <h3 class="sidebar-block__title">Цена, ₸</h3>
+                <form method="get" class="price-filter-form">
+                    {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+                    {% if current_sort %}<input type="hidden" name="sort" value="{{ current_sort }}">{% endif %}
+                    <div class="price-filter-row">
+                        <input type="number" name="price_min" placeholder="От" value="{{ price_min }}">
+                        <input type="number" name="price_max" placeholder="До" value="{{ price_max }}">
+                    </div>
+                    <label class="rating-filter">
+                        <input type="checkbox" name="min_rating" value="4" {% if min_rating == "4" %}checked{% endif %} onchange="this.form.submit()">
+                        4★ и выше
+                    </label>
+                    <button type="submit" class="filter-apply-btn">Применить</button>
+                </form>
+            </div>
+
+            <div class="sidebar-block">
+                <h3 class="sidebar-block__title">Сортировка</h3>
+                <form method="get" class="sort-form">
+                    {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+                    {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+                    <select name="sort" onchange="this.form.submit()" class="sort-select sort-select--full">
+                        <option value="">По умолчанию</option>
+                        <option value="price_asc" {% if current_sort == "price_asc" %}selected{% endif %}>Сначала дешевле</option>
+                        <option value="price_desc" {% if current_sort == "price_desc" %}selected{% endif %}>Сначала дороже</option>
+                        <option value="rating" {% if current_sort == "rating" %}selected{% endif %}>По рейтингу</option>
+                        <option value="newest" {% if current_sort == "newest" %}selected{% endif %}>Новинки</option>
+                    </select>
+                </form>
+            </div>
+
+            {% if compare_count %}
+            <div class="sidebar-block">
+                <h3 class="sidebar-block__title">Сравнение ({{ compare_count }})</h3>
+                <a href="{% url 'compare_view' %}" class="product-detail__buy sidebar-block__btn">Сравнить товары</a>
+            </div>
+            {% endif %}
+        </aside>
     </div>
 </div>
 {% endblock %}

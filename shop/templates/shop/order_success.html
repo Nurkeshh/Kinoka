@@ -1,0 +1,13 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Заказ оформлен{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="order-success">
+        <h2>Спасибо, {{ order.customer_name }}!</h2>
+        <p>Ваш заказ №{{ order.id }} принят. Мы свяжемся с вами по номеру {{ order.customer_phone }}.</p>
+        <a href="{% url 'home' %}" class="product-detail__buy">Вернуться в каталог</a>
+    </div>
+</div>
+{% endblock %}
