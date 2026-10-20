@@ -1,9 +1,11 @@
 from .models import Category, Product
-
-CITIES = {
-    "almaty": {"name": "Алматы", "x": 400, "y": 250},
-    "astana": {"name": "Астана", "x": 320, "y": 100},
-    "shymkent": {"name": "Шымкент", "x": 270, "y": 250},
+#3.45 3.28
+#3.50 3.00
+#270   250
+CITIES = { 
+    "almaty": {"name": "Алматы", "x": 1380, "y": 820},
+    "astana": {"name": "Астана", "x": 1120, "y": 300},
+    "shymkent": {"name": "Шымкент", "x": 1030, "y": 880},
     "karaganda": {"name": "Караганда", "x": 330, "y": 150},
     "aktobe": {"name": "Актобе", "x": 140, "y": 120},
     "taraz": {"name": "Тараз", "x": 300, "y": 240},

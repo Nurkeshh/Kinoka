@@ -65,10 +65,6 @@
                         <i class="fa-regular fa-heart"></i>
                         {% if favorites_count %}<span class="icon__badge">{{ favorites_count }}</span>{% endif %}
                     </a>
-                    <a href="{% url 'cart_detail' %}" class="icon icon--counter" title="Корзина">
-                        <i class="fa-solid fa-cart-shopping"></i>
-                        {% if cart_count %}<span class="icon__badge">{{ cart_count }}</span>{% endif %}
-                    </a>
                 </div>
             </div>
         </div>

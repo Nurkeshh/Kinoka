@@ -20,7 +20,6 @@
                     <p class="card__price">{{ product.price }} ₸</p>
                 </div>
             </a>
-            <a href="{% url 'add_to_cart' product.id %}" class="card__cart"><i class="fa-solid fa-cart-shopping"></i></a>
         </div>
         {% empty %}
             <p>Пока ничего не добавлено в избранное.</p>

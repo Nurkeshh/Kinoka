@@ -80,12 +80,7 @@
             <div class="product-detail__description">{{ product.description|default:"Описание скоро появится."|linebreaks }}</div>
 
             <div class="product-detail__actions">
-                {% if product.in_stock %}
-                    <a href="{% url 'add_to_cart' product.id %}" class="product-detail__buy">В корзину</a>
-                {% else %}
-                    <a href="{% url 'product_request' product.id %}" class="product-detail__buy">Оставить заявку</a>
-                {% endif %}
-
+                
                 {% if product.kaspi_url %}
                     <a href="{{ product.kaspi_url }}" target="_blank" rel="noopener" class="product-detail__buy product-detail__buy--kaspi">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> Купить через Kaspi

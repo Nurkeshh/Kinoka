@@ -49,11 +49,6 @@
                             </div>
                         </div>
                     </a>
-                    {% if product.in_stock %}
-                        <a href="{% url 'add_to_cart' product.id %}" class="card__cart"><i class="fa-solid fa-cart-shopping"></i></a>
-                    {% else %}
-                        <a href="{% url 'product_request' product.id %}" class="card__cart card__cart--request" title="Оставить заявку"><i class="fa-regular fa-bell"></i></a>
-                    {% endif %}
                 </div>
                 {% empty %}
                     <p>Товаров пока нет.</p>
